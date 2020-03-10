@@ -1,0 +1,17 @@
+in the past week:
+ - i started to familiarze myself with unity and how it works
+ - started learning and familiarizing myself with C#
+ - going over certain designs for the rocks and the wall and how to implement them in unity
+
+Feb 25:
+ - downloaded Blender, a software used to create shapes and animations,
+   the projects or files in this software can be transported and used in unity
+ - started working on learning how the software works
+ - for my part, i am currently handling the creation of the character in the game,
+   and using this software will help creating a humanoid object with limbs and joints
+   that can be animated and moved, after the creation of the character, the humanoid object
+   will then be transported as one object to unity. those 3D assests are going to be
+   implemented later alonside the movement script and functions worked on in unity.
+
+Mar 6:
+ - created the character for the first version of the game on blender.

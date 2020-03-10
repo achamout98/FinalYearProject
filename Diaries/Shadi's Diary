@@ -1,0 +1,21 @@
+February 11, 2020
+  
+  This week I sat down with my group members and worked on refining the concept and scope of our rock climbing game. 
+  We defined the basic gameplay mechanics that should be applicable whether or not we are working with VR (will be described
+  in a separate document). I found a very useful tutorial about implementing rock climbing mechanics for VR in Unity, and will 
+  attach the link below. I also downloaded Unity and I am ready to start learning how to code in it once we know what hardware we have
+  available at our disposal.
+  
+  VR Climbing Tutorial: https://wirewhiz.com/vr-climbing-tutorial-unity-steamvr/
+  
+February 25, 2020
+
+  This week my teammates and I realized we are very behind on schedule and need to pick up the pace. Adam and Ali have picked up the
+  role of game design and scripting in Unity while Anas has taken the role of model design using Blender. I have decided to try to
+  to learn the two as best as I can in order to help coordinate between the two "teams" so to speak. 
+  
+March 6, 2020
+
+  This week I experimented with bump mapping to give our mountain a texture to make it look like an actual mountain. First attempt was 
+  not satisfactory but now I have the basics down and I can continue experimenting. If we are to look into other methods of texturing
+  I will await Dr. Turkiyyah's advice to do so.

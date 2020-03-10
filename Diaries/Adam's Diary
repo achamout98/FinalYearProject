@@ -1,0 +1,19 @@
+Febuary 11th:
+  Getting familiar with 3D using unity.
+  Watching tutorials to learn the basics of 3D. 
+  Setting up unity to be ready for VR compatibility and support.
+  Collaborated with group memebers to create the users story which includes basic game functionalities, starting of the game, end of the game.
+  This also includes some sketches to go along with our ideas.
+
+Febuary 18th:
+  Working on Rock Climbing 3D demo using keyboard controls until we can gain access to VR.
+  Learning how to create scripts in C# to implement into the demo:
+    > Movement
+    > Character physics
+    > Grabbable object (rock hitboxes)
+  Main source: https://www.youtube.com/channel/UCYbK_tjZ2OrIZFBvU6CCMiA
+
+Febuary 25th:
+  Worked on ClimbingDemo V0.1 functionalities with Ali:
+    > Worked on the scene environment and project hierarchy
+    > Worked on player and camera controller scripts

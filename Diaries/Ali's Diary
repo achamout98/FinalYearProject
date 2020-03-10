@@ -1,0 +1,15 @@
+February 11:
+  Completed some research pertaining to our project. 
+  Found an article/tutorial on how to implement a rock climbing game in UnityVR
+  Set up unity for VR.
+  Wrote user story and user experience including, game start, game functionality and end.
+ 
+February 25:
+  Worked along side adam to complete the core features of the game including:
+    - Basic climbing mechanics
+    - Jumping which was later removed
+  We adjusted the physics components of the game as well:
+    - There was an issue with the colliders which was fixed. The character was not grabbing the rocks porperly, we had to adust
+    the colliders by making them slightly larger than their bodies.
+  Finally, I smoothed up the climbing process so the character does not look like he is just teleporting to the rock's location but
+  actually making his way up there

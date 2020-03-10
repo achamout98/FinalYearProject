@@ -1,0 +1,15 @@
+Start:
+	Player walks up to the wall/mountain
+	option to look around and decide on which path to take
+	Start climbing; as soon as the player grabs a rock, the game starts
+
+Functionality:
+	Player can only climb up one rock at a time
+	Player can swing sideways to gain momentum for juming sideways
+	Grip strength, slowly depletes while player is hanging on to a rock
+	Grip strength forces players to keep moving
+
+End:
+	The game ends once the player either finishes the level or falls
+	The player can fall by either losing grip strength by staying stationary for too long or by missing a rock
+	jump.
