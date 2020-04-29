@@ -2,6 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class PlayerMovementScript : MonoBehaviour
 {
@@ -9,16 +10,27 @@ public class PlayerMovementScript : MonoBehaviour
     [SerializeField] private float grabDistance;
     [SerializeField] private GameObject Child;
 
+    [SerializeField] private StrengthMeter slider;
+    [SerializeField] private float MaxTime;
+    [SerializeField] private int CoolDownMult;
+    private float timeRemaining;
+
     private Rigidbody rb;
     private Ray ray;
     private RaycastHit hit;
 
     private bool mouseclicked;
 
+    private float CalculatSliderValue () {
+        return (timeRemaining / MaxTime);
+    }
+
     void Start()
     {
         rb = GetComponent<Rigidbody>();
         mouseclicked = false;
+        slider.SetMaxValue(MaxTime);
+        timeRemaining = MaxTime;
     }
 
     void Update()
@@ -68,14 +80,21 @@ public class PlayerMovementScript : MonoBehaviour
     private IEnumerator Climb(Vector3 new_pos, float time) {
         StopCoroutine("Stay");
         Time.timeScale = 1.0f;
-        Debug.Log(Time.timeScale);
+
         float eta = 0f;
+
         Vector3 start_pos = transform.position;
 
         while (mouseclicked) {
             while(eta < time) {
                 transform.position = Vector3.Lerp(start_pos, new_pos, (eta / time));
                 eta += Time.deltaTime;
+
+                timeRemaining += CoolDownMult * Time.deltaTime;
+                if (timeRemaining >= MaxTime) {
+                    timeRemaining = MaxTime;
+                }
+                slider.SetSlider(timeRemaining);
 
                 if (Input.GetMouseButtonUp(0)) {
                     mouseclicked = false;
@@ -94,7 +113,11 @@ public class PlayerMovementScript : MonoBehaviour
     private IEnumerator Stay (Vector3 new_pos) {
         while (mouseclicked) {
             transform.position = new_pos;
-            if (Input.GetMouseButtonUp(0)) {
+            //**
+            timeRemaining -= Time.deltaTime;
+            slider.SetSlider(timeRemaining);
+            //**
+            if (Input.GetMouseButtonUp(0) || timeRemaining <= 0) {
                 mouseclicked = false;
 
                 float t = 0f;
@@ -104,7 +127,6 @@ public class PlayerMovementScript : MonoBehaviour
                 while(t < duration) {
 
                     t += Time.deltaTime;
-                    Debug.Log(t);
 
                     yield return null;
 
@@ -114,6 +136,14 @@ public class PlayerMovementScript : MonoBehaviour
                 yield break;
             }
             yield return null;
+        }
+        
+        if (timeRemaining <= 0) {
+            while(timeRemaining < MaxTime) {
+                timeRemaining += 80 * Time.deltaTime;
+                slider.SetSlider(timeRemaining);
+                yield return null;
+            }
         }
         yield break;
     }
