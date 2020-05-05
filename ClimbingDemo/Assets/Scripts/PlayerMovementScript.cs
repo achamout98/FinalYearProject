@@ -36,7 +36,9 @@ public class PlayerMovementScript : MonoBehaviour
     void Update()
     {
         //Player rotation (camera and playerbody both rotate)
-        transform.rotation = Quaternion.LookRotation(Child.transform.forward);
+        if (!GameManager.is_paused) {
+            transform.rotation = Quaternion.LookRotation(Child.transform.forward);
+        }
         //Grabbing rocks
         Grab();
 
@@ -147,7 +149,6 @@ public class PlayerMovementScript : MonoBehaviour
         }
         yield break;
     }
-
 
     private void Move()
     {
