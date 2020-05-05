@@ -18,8 +18,13 @@ public class PlayerMovementScript : MonoBehaviour
     private Rigidbody rb;
     private Ray ray;
     private RaycastHit hit;
+    private bool isGrounded;
 
     private bool mouseclicked;
+
+    private Animator anim;
+    private float currSpeed;
+    private Vector3 lastPosition;
 
     private float CalculatSliderValue () {
         return (timeRemaining / MaxTime);
@@ -31,25 +36,54 @@ public class PlayerMovementScript : MonoBehaviour
         mouseclicked = false;
         slider.SetMaxValue(MaxTime);
         timeRemaining = MaxTime;
+        isGrounded = true;
+
+        anim = GetComponent<Animator>();
+        currSpeed = 0f;
+        lastPosition = Vector3.zero;
     }
 
     void Update()
     {
         //Player rotation (camera and playerbody both rotate)
         if (!GameManager.is_paused) {
-            transform.rotation = Quaternion.LookRotation(Child.transform.forward);
+
+            float x = Child.transform.forward.x;
+            float y = Child.transform.forward.y;
+            float z = Child.transform.forward.z;
+            
+            transform.rotation = Quaternion.LookRotation(new Vector3(x, 0, z));
         }
         //Grabbing rocks
         Grab();
 
+        if (isGrounded) {
+            timeRemaining = MaxTime;
+            slider.SetSlider(timeRemaining);
+        }
         
     }
 
     private void FixedUpdate()
     {
+
         Move();
+        currSpeed = Vector3.Distance(lastPosition, transform.position) / Time.deltaTime;
+        lastPosition = transform.position;
+        anim.SetFloat("Speed", currSpeed);
     }
 
+    private void OnCollisionEnter ( Collision collision ) {
+        if (collision.gameObject.tag.Equals("Ground")) {
+            isGrounded = true;
+        }
+    }
+
+    private void OnCollisionExit ( Collision collision ) {
+        if (collision.gameObject.tag.Equals("Ground")) {
+            isGrounded = false;
+        }
+    }
     /************************************************************************************************************/
 
     private void Grab()
@@ -82,13 +116,17 @@ public class PlayerMovementScript : MonoBehaviour
     private IEnumerator Climb(Vector3 new_pos, float time) {
         StopCoroutine("Stay");
         Time.timeScale = 1.0f;
-
         float eta = 0f;
 
         Vector3 start_pos = transform.position;
 
         while (mouseclicked) {
             while(eta < time) {
+                if (Input.GetMouseButtonUp(0)) {
+                    mouseclicked = false;
+                    StopCoroutine("Climb");
+                    yield break;
+                }
                 transform.position = Vector3.Lerp(start_pos, new_pos, (eta / time));
                 eta += Time.deltaTime;
 
@@ -98,11 +136,6 @@ public class PlayerMovementScript : MonoBehaviour
                 }
                 slider.SetSlider(timeRemaining);
 
-                if (Input.GetMouseButtonUp(0)) {
-                    mouseclicked = false;
-                    StopCoroutine("Climb");
-                    yield break;
-                }
 
                 yield return null;
             }
@@ -126,7 +159,7 @@ public class PlayerMovementScript : MonoBehaviour
                 float duration = 0.2f;
 
                 Time.timeScale = 0.2f;
-                while(t < duration) {
+                while (t < duration) {
 
                     t += Time.deltaTime;
 
@@ -140,13 +173,13 @@ public class PlayerMovementScript : MonoBehaviour
             yield return null;
         }
         
-        if (timeRemaining <= 0) {
-            while(timeRemaining < MaxTime) {
-                timeRemaining += 80 * Time.deltaTime;
-                slider.SetSlider(timeRemaining);
-                yield return null;
-            }
-        }
+        //if (timeRemaining <= 0) {
+        //    while(timeRemaining < MaxTime) {
+        //        timeRemaining += 80 * Time.deltaTime;
+        //        slider.SetSlider(timeRemaining);
+        //        yield return null;
+        //    }
+        //}
         yield break;
     }
 
