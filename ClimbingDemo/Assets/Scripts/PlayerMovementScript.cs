@@ -8,23 +8,38 @@ public class PlayerMovementScript : MonoBehaviour
 {
     [SerializeField] private float speed;
     [SerializeField] private float grabDistance;
-    [SerializeField] private GameObject Child;
+    [SerializeField] private GameObject Cam;
 
     [SerializeField] private StrengthMeter slider;
     [SerializeField] private float MaxTime;
-    [SerializeField] private int CoolDownMult;
+    [SerializeField]
+    [Range(1, 25)]
+    private int CoolDownMult = 1;
     private float timeRemaining;
 
     private Rigidbody rb;
+
+    private GameObject RightHand;
+    private GameObject LeftHand;
+    private GameObject SelectedHand;
+
+    private Vector3 SelectedHandPos;
+    private Vector3 StandbyPos;
+    private Vector3 SelectedHandPosR = new Vector3(0.3f, 0.7f, 2);
+    private Vector3 SelectedHandPosL = new Vector3(-0.3f, 0.7f, 2);
+    private Vector3 HandClimbingPos = Vector3.zero;
+    
+
+    private Vector3 OriginalPosR;
+    private Vector3 OriginalPosL;
+
     private Ray ray;
     private RaycastHit hit;
     private bool isGrounded;
 
     private bool mouseclicked;
 
-    private Animator anim;
-    private float currSpeed;
-    private Vector3 lastPosition;
+    private bool isClimbing;
 
     private float CalculatSliderValue () {
         return (timeRemaining / MaxTime);
@@ -33,27 +48,33 @@ public class PlayerMovementScript : MonoBehaviour
     void Start()
     {
         rb = GetComponent<Rigidbody>();
+
+        GetHands();
+
         mouseclicked = false;
         slider.SetMaxValue(MaxTime);
         timeRemaining = MaxTime;
         isGrounded = true;
-
-        anim = GetComponent<Animator>();
-        currSpeed = 0f;
-        lastPosition = Vector3.zero;
+        isClimbing = false;
     }
 
     void Update()
     {
+
         //Player rotation (camera and playerbody both rotate)
         if (!GameManager.is_paused) {
 
-            float x = Child.transform.forward.x;
-            float y = Child.transform.forward.y;
-            float z = Child.transform.forward.z;
+            float x = Cam.transform.forward.x;
+            float y = Cam.transform.forward.y;
+            float z = Cam.transform.forward.z;
             
-            transform.rotation = Quaternion.LookRotation(new Vector3(x, 0, z));
+            transform.rotation = Quaternion.LookRotation(new Vector3(x, y, z));
         }
+
+        if (Input.GetKeyDown(KeyCode.Tab)) {
+            StartCoroutine(SwitchHands());
+        }
+        
         //Grabbing rocks
         Grab();
 
@@ -66,11 +87,7 @@ public class PlayerMovementScript : MonoBehaviour
 
     private void FixedUpdate()
     {
-
         Move();
-        currSpeed = Vector3.Distance(lastPosition, transform.position) / Time.deltaTime;
-        lastPosition = transform.position;
-        anim.SetFloat("Speed", currSpeed);
     }
 
     private void OnCollisionEnter ( Collision collision ) {
@@ -85,20 +102,66 @@ public class PlayerMovementScript : MonoBehaviour
         }
     }
     /************************************************************************************************************/
+    private void GetHands () {
+        LeftHand = transform.GetChild(1).gameObject;
+        OriginalPosL = LeftHand.transform.localPosition;
 
-    private void Grab()
-    {
-        ray = Camera.main.ScreenPointToRay(Input.mousePosition);
-        if (Physics.Raycast(ray, out hit))
-        {
+        RightHand = transform.GetChild(2).gameObject;
+        OriginalPosR = RightHand.transform.localPosition;
+
+        SelectedHand = RightHand;
+        StartCoroutine(SwitchHands());
+    }
+
+    private IEnumerator SwitchHands () {
+        float time = 0.6f;
+        float eta = 0f;
+
+        if (SelectedHand.name == "Left_Hand") {
+            if (!isClimbing) {
+                StandbyPos = OriginalPosL;
+
+            } else {
+                StandbyPos = HandClimbingPos;
+            }
+            while (eta < time) {
+                SelectedHand.transform.localPosition = Vector3.Lerp(SelectedHandPosL, StandbyPos, (eta / time));
+                RightHand.transform.localPosition = Vector3.Lerp(OriginalPosR, SelectedHandPosR, (eta / time));
+                eta += Time.deltaTime;
+                yield return null;
+            }
+            SelectedHand = RightHand;
+            SelectedHandPos = SelectedHandPosR;
+        } else {
+            if (!isClimbing) {
+                StandbyPos = OriginalPosR;
+            } else {
+                StandbyPos = HandClimbingPos;
+            }
+            while (eta < time) {
+                SelectedHand.transform.localPosition = Vector3.Lerp(SelectedHandPosR, StandbyPos, (eta / time));
+                LeftHand.transform.localPosition = Vector3.Lerp(OriginalPosL, SelectedHandPosL, (eta / time));
+                eta += Time.deltaTime;
+                yield return null;
+            }
+            Debug.Log("done");
+            SelectedHand = LeftHand;
+            SelectedHandPos = SelectedHandPosL;
+        }
+        yield break;
+    }
+
+    private void Grab () {
+        var origin = SelectedHand.transform.position;
+        var direction = SelectedHand.transform.forward;
+        var rot = SelectedHand.transform.rotation;
+
+        if (Physics.BoxCast(origin, new Vector3(0.15f, 0.15f, 0.15f), direction, out hit, rot)) {
             String tag = hit.collider.tag;
-            if (tag.Equals("Rock"))
-            {
+            if (tag.Equals("Rock")) {
                 Transform sphere = hit.collider.gameObject.transform;
-                if (Vector3.Distance(transform.position, sphere.position) <= grabDistance)
-                {
-                    if (Input.GetMouseButtonDown(0))
-                    {
+                if (Vector3.Distance(transform.position, sphere.position) <= grabDistance) {
+                    if (Input.GetMouseButtonDown(0)) {
                         mouseclicked = true;
 
                         float x = sphere.position.x;
@@ -114,47 +177,51 @@ public class PlayerMovementScript : MonoBehaviour
     }
 
     private IEnumerator Climb(Vector3 new_pos, float time) {
+        if (!isClimbing) {
+            isClimbing = true;
+        }
         StopCoroutine("Stay");
         Time.timeScale = 1.0f;
         float eta = 0f;
 
         Vector3 start_pos = transform.position;
 
-        while (mouseclicked) {
-            while(eta < time) {
-                if (Input.GetMouseButtonUp(0)) {
-                    mouseclicked = false;
-                    StopCoroutine("Climb");
-                    yield break;
-                }
-                transform.position = Vector3.Lerp(start_pos, new_pos, (eta / time));
-                eta += Time.deltaTime;
-
-                timeRemaining += CoolDownMult * Time.deltaTime;
-                if (timeRemaining >= MaxTime) {
-                    timeRemaining = MaxTime;
-                }
-                slider.SetSlider(timeRemaining);
-
-
-                yield return null;
+        StartCoroutine(SwitchHands());
+        while (eta < time) {
+            if (Input.GetMouseButtonUp(0)) {
+                mouseclicked = false;
+                StopCoroutine("Climb");
+                yield break;
             }
-            StartCoroutine(Stay(new_pos));
+            transform.position = Vector3.Lerp(start_pos, new_pos, (eta / time));
+            eta += Time.deltaTime;
+
+            timeRemaining += CoolDownMult * Time.deltaTime;
+            if (timeRemaining >= MaxTime) {
+                timeRemaining = MaxTime;
+            }
+            slider.SetSlider(timeRemaining);
+
             yield return null;
         }
-        yield return null;
+        StartCoroutine(Stay(new_pos));
+
+        yield break;
     }
 
     private IEnumerator Stay (Vector3 new_pos) {
+        //SwitchHands();
         while (mouseclicked) {
             transform.position = new_pos;
-            //**
+
             timeRemaining -= Time.deltaTime;
             slider.SetSlider(timeRemaining);
-            //**
+
             if (Input.GetMouseButtonUp(0) || timeRemaining <= 0) {
                 mouseclicked = false;
-
+                if (isClimbing) {
+                    isClimbing = false;
+                }
                 float t = 0f;
                 float duration = 0.2f;
 
@@ -172,14 +239,7 @@ public class PlayerMovementScript : MonoBehaviour
             }
             yield return null;
         }
-        
-        //if (timeRemaining <= 0) {
-        //    while(timeRemaining < MaxTime) {
-        //        timeRemaining += 80 * Time.deltaTime;
-        //        slider.SetSlider(timeRemaining);
-        //        yield return null;
-        //    }
-        //}
+ 
         yield break;
     }
 
