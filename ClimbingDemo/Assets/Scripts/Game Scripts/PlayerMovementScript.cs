@@ -53,11 +53,8 @@ public class PlayerMovementScript : MonoBehaviour
 
         GetHands();
 
-        //mouseclicked = false;
         slider.SetMaxValue(MaxTime);
         timeRemaining = MaxTime;
-        //isGrounded = true;
-        //isClimbing = false;
     }
 
     void Update()
@@ -157,7 +154,6 @@ public class PlayerMovementScript : MonoBehaviour
                 eta += Time.deltaTime;
                 yield return null;
             }
-            Debug.Log("done");
             SelectedHand = LeftHand;
             SelectedHandPos = SelectedHandPosL;
         }

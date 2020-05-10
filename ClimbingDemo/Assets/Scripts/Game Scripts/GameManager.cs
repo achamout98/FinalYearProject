@@ -32,7 +32,11 @@ public class GameManager : MonoBehaviour
     [SerializeField]
     private GameObject Player;
 
-        // Start is called before the first frame update
+    private void Awake () {
+        Resume();
+    }
+
+    // Start is called before the first frame update
     void Start()
     {
         StartCoroutine("SpawnRocks");
@@ -63,6 +67,7 @@ public class GameManager : MonoBehaviour
     }
 
     public void Quit () {
+        Time.timeScale = 1;
         SceneManager.LoadScene("Menu");
     }
 
