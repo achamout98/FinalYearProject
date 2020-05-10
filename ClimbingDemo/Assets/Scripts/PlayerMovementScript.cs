@@ -35,11 +35,13 @@ public class PlayerMovementScript : MonoBehaviour
 
     private Ray ray;
     private RaycastHit hit;
-    private bool isGrounded;
+    private bool isGrounded = true;
 
-    private bool mouseclicked;
+    private bool mouseclicked = false;
 
-    private bool isClimbing;
+    private bool isClimbing = false;
+    private bool switching = false;
+    private bool inClimbingPos = false;
 
     private float CalculatSliderValue () {
         return (timeRemaining / MaxTime);
@@ -51,11 +53,11 @@ public class PlayerMovementScript : MonoBehaviour
 
         GetHands();
 
-        mouseclicked = false;
+        //mouseclicked = false;
         slider.SetMaxValue(MaxTime);
         timeRemaining = MaxTime;
-        isGrounded = true;
-        isClimbing = false;
+        //isGrounded = true;
+        //isClimbing = false;
     }
 
     void Update()
@@ -72,7 +74,10 @@ public class PlayerMovementScript : MonoBehaviour
         }
 
         if (Input.GetKeyDown(KeyCode.Tab)) {
-            StartCoroutine(SwitchHands());
+            if (!switching) {
+
+                StartCoroutine(SwitchHands());
+            }
         }
         
         //Grabbing rocks
@@ -92,6 +97,9 @@ public class PlayerMovementScript : MonoBehaviour
 
     private void OnCollisionEnter ( Collision collision ) {
         if (collision.gameObject.tag.Equals("Ground")) {
+            if (inClimbingPos) {
+                StartCoroutine(SwitchHands());
+            }
             isGrounded = true;
         }
     }
@@ -114,14 +122,17 @@ public class PlayerMovementScript : MonoBehaviour
     }
 
     private IEnumerator SwitchHands () {
+        switching = true;
         float time = 0.6f;
         float eta = 0f;
 
         if (SelectedHand.name == "Left_Hand") {
             if (!isClimbing) {
+                inClimbingPos = false;
                 StandbyPos = OriginalPosL;
 
             } else {
+                inClimbingPos = true;
                 StandbyPos = HandClimbingPos;
             }
             while (eta < time) {
@@ -134,8 +145,10 @@ public class PlayerMovementScript : MonoBehaviour
             SelectedHandPos = SelectedHandPosR;
         } else {
             if (!isClimbing) {
+                inClimbingPos = false;
                 StandbyPos = OriginalPosR;
             } else {
+                inClimbingPos = true;
                 StandbyPos = HandClimbingPos;
             }
             while (eta < time) {
@@ -148,6 +161,7 @@ public class PlayerMovementScript : MonoBehaviour
             SelectedHand = LeftHand;
             SelectedHandPos = SelectedHandPosL;
         }
+        switching = false;
         yield break;
     }
 
