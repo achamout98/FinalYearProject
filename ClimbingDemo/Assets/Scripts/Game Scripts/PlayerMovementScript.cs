@@ -6,18 +6,19 @@ using UnityEngine.UI;
 
 public class PlayerMovementScript : MonoBehaviour
 {
+    [Header("Mechanics Parameters")]
     [SerializeField] private float speed;
     [SerializeField] private float grabDistance;
-    [SerializeField] private GameObject Cam;
-
-    [SerializeField] private StrengthMeter slider;
     [SerializeField] private float MaxTime;
     [SerializeField]
     [Range(1, 25)]
     private int CoolDownMult = 1;
-    private float timeRemaining;
 
-    private Rigidbody rb;
+    [Header("References")]
+    [SerializeField] private GameObject Cam;
+
+    [SerializeField] private StrengthMeter slider;
+    private float timeRemaining;
 
     private GameObject RightHand;
     private GameObject LeftHand;
@@ -28,20 +29,22 @@ public class PlayerMovementScript : MonoBehaviour
     private Vector3 SelectedHandPosR = new Vector3(0.3f, 0.7f, 2);
     private Vector3 SelectedHandPosL = new Vector3(-0.3f, 0.7f, 2);
     private Vector3 HandClimbingPos = Vector3.zero;
-    
 
     private Vector3 OriginalPosR;
     private Vector3 OriginalPosL;
+    
+    private bool isClimbing = false;
+    private bool isGrounded = true;
+    private bool switching = false;
+    private bool mouseclicked = false;
+    private bool inClimbingPos = false;
 
+
+    private Rigidbody rb;
     private Ray ray;
     private RaycastHit hit;
-    private bool isGrounded = true;
 
-    private bool mouseclicked = false;
 
-    private bool isClimbing = false;
-    private bool switching = false;
-    private bool inClimbingPos = false;
 
     private float CalculatSliderValue () {
         return (timeRemaining / MaxTime);
@@ -70,7 +73,9 @@ public class PlayerMovementScript : MonoBehaviour
             transform.rotation = Quaternion.LookRotation(new Vector3(x, y, z));
         }
 
+        //switch between hands
         if (Input.GetKeyDown(KeyCode.Tab)) {
+            //Check if hands are already switching so player cannot switch hands while hands are already switching
             if (!switching) {
 
                 StartCoroutine(SwitchHands());
@@ -93,7 +98,9 @@ public class PlayerMovementScript : MonoBehaviour
     }
 
     private void OnCollisionEnter ( Collision collision ) {
+        //Checks if player is on the ground
         if (collision.gameObject.tag.Equals("Ground")) {
+            //Sets player's hands back to the non-climbing position when the player hits the ground
             if (inClimbingPos) {
                 StartCoroutine(SwitchHands());
             }
@@ -102,6 +109,7 @@ public class PlayerMovementScript : MonoBehaviour
     }
 
     private void OnCollisionExit ( Collision collision ) {
+        //Checks if player has left the ground
         if (collision.gameObject.tag.Equals("Ground")) {
             isGrounded = false;
         }
@@ -119,11 +127,22 @@ public class PlayerMovementScript : MonoBehaviour
     }
 
     private IEnumerator SwitchHands () {
+        //switched between selected hands
         switching = true;
         float time = 0.6f;
         float eta = 0f;
 
         if (SelectedHand.name == "Left_Hand") {
+            /*
+             * Checks if player is climbing to set the hands position accordingly:
+             *      If player is climbing then:
+             *          Selected hand position should not change
+             *          Other hand should be positioned on the rock
+             *      
+             *      If the player is not climbing:
+             *          Slected hand goes to the designated position
+             *          Other hand positioned the the side of the player (it's original position)
+             */
             if (!isClimbing) {
                 inClimbingPos = false;
                 StandbyPos = OriginalPosL;
@@ -162,6 +181,7 @@ public class PlayerMovementScript : MonoBehaviour
     }
 
     private void Grab () {
+        //Sends box cast to detect rocks and checks if the rocks are within reaching distance and starts climbing
         var origin = SelectedHand.transform.position;
         var direction = SelectedHand.transform.forward;
         var rot = SelectedHand.transform.rotation;
@@ -220,7 +240,10 @@ public class PlayerMovementScript : MonoBehaviour
     }
 
     private IEnumerator Stay (Vector3 new_pos) {
-        //SwitchHands();
+        /*Suspends player in the desired position after having climbed to it
+         * If at any point the player releases the left click or the strength gauge runs out, 
+         * the player will fall
+         */
         while (mouseclicked) {
             transform.position = new_pos;
 
