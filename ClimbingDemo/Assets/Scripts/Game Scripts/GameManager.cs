@@ -20,12 +20,6 @@ public class GameManager : MonoBehaviour
     [SerializeField]
     private List<GameObject> RockPrefabs;
 
-    [SerializeField]
-    private List<GameObject> Walls;
-
-    [SerializeField]
-    private GameObject WallSpawnPoints;
-
     [Header("References")]
     [SerializeField]
     private GameObject Cam;

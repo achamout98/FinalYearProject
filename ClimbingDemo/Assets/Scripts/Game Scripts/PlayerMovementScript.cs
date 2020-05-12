@@ -7,12 +7,13 @@ using UnityEngine.UI;
 public class PlayerMovementScript : MonoBehaviour
 {
     [Header("Mechanics Parameters")]
-    [SerializeField] private float speed;
-    [SerializeField] private float grabDistance;
-    [SerializeField] private float MaxTime;
+    [SerializeField] private float speed = 10f;
+    [SerializeField] private float grabDistance = 25f;
+    [SerializeField] private float MaxTime = 10f;
     [SerializeField]
     [Range(1, 25)]
     private int CoolDownMult = 1;
+    [SerializeField] private float penalty = 0.15f;
 
     [Header("References")]
     [SerializeField] private GameObject Cam;
@@ -110,6 +111,11 @@ public class PlayerMovementScript : MonoBehaviour
             }
             isGrounded = true;
         }
+
+        if (collision.gameObject.tag.Equals("Obstacle")) {
+            timeRemaining = timeRemaining * (1 - penalty);
+            slider.SetSlider(timeRemaining);
+       }
     }
 
     private void OnCollisionExit ( Collision collision ) {
