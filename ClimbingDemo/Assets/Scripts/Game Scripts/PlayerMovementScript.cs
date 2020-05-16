@@ -50,10 +50,25 @@ public class PlayerMovementScript : MonoBehaviour {
         return (timeRemaining / MaxTime);
     }
 
+    //private void Awake () {
+    //    float x_l = LeftHand.transform.rotation.x;
+    //    float y_l = LeftHand.transform.rotation.y;
+    //    float z_l = LeftHand.transform.rotation.z;
+
+    //    LeftHand.transform.rotation = new Quaternion(x_l, 180, z_l, 1);
+
+    //    float x_r = RightHand.transform.rotation.x;
+    //    float y_r = RightHand.transform.rotation.y;
+    //    float z_r = RightHand.transform.rotation.z;
+
+    //    RightHand.transform.rotation = new Quaternion(x_r, 180, z_r, 1);
+
+    //}
+
     void Start()
     {
         rb = GetComponent<Rigidbody>();
-        anim = RightHand.GetComponent<Animator>();
+        //anim = RightHand.GetComponent<Animator>();
 
         OriginalPosL = LeftHand.transform.localPosition;
         OriginalPosR = RightHand.transform.localPosition;
@@ -88,7 +103,8 @@ public class PlayerMovementScript : MonoBehaviour {
             }
         }
 
-        if (Input.GetMouseButtonDown(0)) {
+        if (Input.GetMouseButtonDown(0) && !switching) {
+            anim = SelectedHand.GetComponent<Animator>();
             anim.SetBool("grabbing", true);
         }
         if (Input.GetMouseButtonUp(0)) {
@@ -156,7 +172,7 @@ public class PlayerMovementScript : MonoBehaviour {
         float time = 0.6f;
         float eta = 0f;
 
-        if (SelectedHand.name == "LeftHand") {
+        if (SelectedHand.tag == "LeftHand") {
             /*
              * Checks if player is climbing to set the hands position accordingly:
              *      If player is climbing then:

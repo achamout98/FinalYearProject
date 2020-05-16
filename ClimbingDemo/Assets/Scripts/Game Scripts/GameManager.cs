@@ -27,6 +27,7 @@ public class GameManager : MonoBehaviour
     private GameObject Player;
 
     private void Awake () {
+        Cam = Camera.main.gameObject;
         Resume();
     }
 
