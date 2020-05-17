@@ -12,6 +12,8 @@ GameObject:
   - component: {fileID: 33300035446148006}
   - component: {fileID: 23250622934378492}
   - component: {fileID: 6767684699829343637}
+  - component: {fileID: 5615543162238100872}
+  - component: {fileID: 1863807705584841197}
   m_Layer: 0
   m_Name: Rock_3
   m_TagString: Rock
@@ -87,7 +89,35 @@ BoxCollider:
   m_GameObject: {fileID: 1337108901918474}
   m_Material: {fileID: 0}
   m_IsTrigger: 0
-  m_Enabled: 1
+  m_Enabled: 0
   serializedVersion: 2
   m_Size: {x: 4.67, y: 2.78, z: 4.06}
   m_Center: {x: 0.8464903, y: 0.007455051, z: -0.25935155}
+--- !u!136 &5615543162238100872
+CapsuleCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1337108901918474}
+  m_Material: {fileID: 0}
+  m_IsTrigger: 0
+  m_Enabled: 0
+  m_Radius: 1.56
+  m_Height: 5.43
+  m_Direction: 0
+  m_Center: {x: 0.8, y: 0, z: -0.33}
+--- !u!64 &1863807705584841197
+MeshCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1337108901918474}
+  m_Material: {fileID: 0}
+  m_IsTrigger: 0
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Convex: 0
+  m_CookingOptions: 14
+  m_Mesh: {fileID: 4300000, guid: f902b41e10cdd2d44aaf1ada606f5d3c, type: 3}

@@ -26,8 +26,8 @@ public class PlayerMovementScript : MonoBehaviour {
 
     private Vector3 SelectedHandPos;
     private Vector3 StandbyPos;
-    private Vector3 SelectedHandPosR = new Vector3(0.8f, 0.5f, 2);
-    private Vector3 SelectedHandPosL = new Vector3(-0.8f, 0.5f, 2);
+    private Vector3 SelectedHandPosR = new Vector3(0.8f, 0.5f, 1.8f);
+    private Vector3 SelectedHandPosL = new Vector3(-0.8f, 0.5f, 1.8f);
     private Vector3 HandClimbingPos = new Vector3(0, -1, 0);
 
     private Vector3 OriginalPosR;
@@ -50,21 +50,6 @@ public class PlayerMovementScript : MonoBehaviour {
         return (timeRemaining / MaxTime);
     }
 
-    //private void Awake () {
-    //    float x_l = LeftHand.transform.rotation.x;
-    //    float y_l = LeftHand.transform.rotation.y;
-    //    float z_l = LeftHand.transform.rotation.z;
-
-    //    LeftHand.transform.rotation = new Quaternion(x_l, 180, z_l, 1);
-
-    //    float x_r = RightHand.transform.rotation.x;
-    //    float y_r = RightHand.transform.rotation.y;
-    //    float z_r = RightHand.transform.rotation.z;
-
-    //    RightHand.transform.rotation = new Quaternion(x_r, 180, z_r, 1);
-
-    //}
-
     void Start()
     {
         rb = GetComponent<Rigidbody>();
@@ -74,6 +59,7 @@ public class PlayerMovementScript : MonoBehaviour {
         OriginalPosR = RightHand.transform.localPosition;
 
         SelectedHand = RightHand;
+        anim = SelectedHand.GetComponent<Animator>();
         StartCoroutine(SwitchHands());
         //GetHands();
 
@@ -83,7 +69,6 @@ public class PlayerMovementScript : MonoBehaviour {
 
     void Update()
     {
-
         //Player rotation (camera and playerbody both rotate)
         if (!GameManager.is_paused) {
 
@@ -104,7 +89,7 @@ public class PlayerMovementScript : MonoBehaviour {
         }
 
         if (Input.GetMouseButtonDown(0) && !switching) {
-            anim = SelectedHand.GetComponent<Animator>();
+            //anim = SelectedHand.GetComponent<Animator>();
             anim.SetBool("grabbing", true);
         }
         if (Input.GetMouseButtonUp(0)) {
@@ -216,6 +201,8 @@ public class PlayerMovementScript : MonoBehaviour {
             SelectedHand = LeftHand;
             SelectedHandPos = SelectedHandPosL;
         }
+        anim.SetBool("grabbing", false);
+        anim = SelectedHand.GetComponent<Animator>();
         switching = false;
         yield break;
     }
@@ -223,17 +210,40 @@ public class PlayerMovementScript : MonoBehaviour {
     private void Grab () {
         var child = SelectedHand.transform.GetChild(0);
         var origin = child.transform.position;
-        var direction = child.transform.forward;
+        var direction = child.transform.position + child.transform.forward;
         var rot = SelectedHand.transform.rotation;
+        //Debug.Log(rot);
+        //if (Physics.BoxCast(origin, new Vector3(1.5f, 2, 1), direction, out hit, rot, 1f)) {
+        //    Debug.Log(hit.collider.tag);
+        //    String tag = hit.collider.tag;
+        //    if (tag.Equals("Rock")) {
+        //        Transform sphere = hit.collider.gameObject.transform;
+        //        if (Vector3.Distance(transform.position, sphere.position) <= grabDistance) {
+        //            if (Input.GetMouseButtonDown(0)) {
+        //                StopCoroutine("Stay");
+        //                anim.SetBool("grabbing", true);
+        //                mouseclicked = true;
 
-        if (Physics.SphereCast(origin, 0.25f, direction, out hit, 2f)) {
+        //                float x = sphere.position.x;
+        //                float y = sphere.position.y;
+        //                float z = sphere.position.z - 2f;
+
+        //                Vector3 new_pos = new Vector3(x, y, z);
+        //                StartCoroutine(Climb(new_pos, 0.60f));
+        //            }
+        //        }
+        //    }
+        //}
+
+        if (Physics.SphereCast(origin, 0.5f, direction, out hit, 0.5f)) {
             Debug.Log(hit.collider.tag);
             String tag = hit.collider.tag;
             if (tag.Equals("Rock")) {
                 Transform sphere = hit.collider.gameObject.transform;
                 if (Vector3.Distance(transform.position, sphere.position) <= grabDistance) {
                     if (Input.GetMouseButtonDown(0)) {
-                        //anim.SetBool("grabbing", true);
+                        StopCoroutine("Stay");
+                        anim.SetBool("grabbing", true);
                         mouseclicked = true;
 
                         float x = sphere.position.x;
@@ -247,43 +257,18 @@ public class PlayerMovementScript : MonoBehaviour {
             }
         }
     }
-    //private void Grab () {
-    //    //Sends box cast to detect rocks and checks if the rocks are within reaching distance and starts climbing
-    //    var child = SelectedHand.transform.GetChild(0);
-    //    var origin = child.transform.position;
-    //    var direction = SelectedHand.transform.forward;
-    //    var rot = SelectedHand.transform.rotation;
-
-    //    if (Physics.BoxCast(origin, new Vector3(0.5f, 0.5f, 0.5f), direction, out hit, rot, 2)) {
-    //        Debug.Log(hit.collider.tag);
-    //        String tag = hit.collider.tag;
-    //        if (tag.Equals("Rock")) {
-    //            Transform sphere = hit.collider.gameObject.transform;
-    //            if (Vector3.Distance(transform.position, sphere.position) <= grabDistance) {
-    //                if (Input.GetMouseButtonDown(0)) {
-    //                    mouseclicked = true;
-
-    //                    float x = sphere.position.x;
-    //                    float y = sphere.position.y;
-    //                    float z = sphere.position.z - 2f;
-
-    //                    Vector3 new_pos = new Vector3(x, y, z);
-    //                    StartCoroutine(Climb(new_pos, 0.60f));
-    //                }
-    //            }
-    //        }
-    //    }
-    //}
 
     private IEnumerator Climb(Vector3 new_pos, float time) {
+        StopCoroutine("Stay");
         if (!isClimbing) {
             isClimbing = true;
         }
-        StopCoroutine("Stay");
         Time.timeScale = 1.0f;
         float eta = 0f;
 
         Vector3 start_pos = transform.position;
+
+        //yield return new WaitForSeconds(0.25f);
 
         StartCoroutine(SwitchHands());
         while (eta < time) {
@@ -319,29 +304,52 @@ public class PlayerMovementScript : MonoBehaviour {
             timeRemaining -= Time.deltaTime;
             slider.SetSlider(timeRemaining);
 
-            if (Input.GetMouseButtonUp(0) /*|| timeRemaining <= 0*/) {
-                mouseclicked = false;
-                if (isClimbing) {
-                    isClimbing = false;
-                }
-                float t = 0f;
-                float duration = 0.2f;
+            if (Input.GetMouseButtonUp(0) || timeRemaining <= 0) {
+                //if (timeRemaining > 0) {
+                //    //yield return new WaitForSeconds(0.25f);
+                //    var t = 0.25f;
 
-                Time.timeScale = 0.2f;
-                while (t < duration) {
-
-                    t += Time.deltaTime;
-
-                    yield return null;
-
-                }
-                Time.timeScale = 1.0f;
-
-                yield break;
+                //    while (t > 0) {
+                //        transform.position = new_pos;
+                //        t -= Time.deltaTime;
+                //        yield return null;
+                //    }
+                //}
+                break;
             }
+            //if (Input.GetMouseButtonUp(0) && timeRemaining > 0) {
+            //    //transform.position = new_pos;
+            //    //yield return new WaitForSecondsRealtime(0.25f);
+            //    StartCoroutine(Fall());
+            //    yield break;
+            //} else if (timeRemaining <= 0) {
+            //    StartCoroutine(Fall());
+            //}
             yield return null;
         }
+        //transform.position = new_pos;
+        StartCoroutine(Fall());
  
+        yield break;
+    }
+
+    private IEnumerator Fall () {
+        mouseclicked = false;
+        if (isClimbing) {
+            isClimbing = false;
+        }
+        float t = 0f;
+        float duration = 0.2f;
+
+        Time.timeScale = 0.2f;
+        while (t < duration) {
+
+            t += Time.deltaTime;
+
+            yield return null;
+
+        }
+        Time.timeScale = 1.0f;
         yield break;
     }
 
