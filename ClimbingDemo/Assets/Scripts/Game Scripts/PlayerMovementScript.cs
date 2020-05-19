@@ -117,7 +117,7 @@ public class PlayerMovementScript : MonoBehaviour {
 
     private void OnCollisionEnter ( Collision collision ) {
         //Checks if player is on the ground
-        if (collision.gameObject.tag.Equals("Ground")) {
+        if (collision.gameObject.tag.Equals("Ground") || collision.gameObject.tag.Equals("Platform")) {
             //Sets player's hands back to the non-climbing position when the player hits the ground
             if (inClimbingPos) {
                 StartCoroutine(SwitchHands());
@@ -212,6 +212,16 @@ public class PlayerMovementScript : MonoBehaviour {
         var origin = child.transform.position;
         var direction = child.transform.position + child.transform.forward;
         var rot = SelectedHand.transform.rotation;
+
+        var child1 = SelectedHand.transform.GetChild(1);
+        var origin1 = child1.transform.position;
+        var direction1 = child1.transform.position + child1.transform.forward;
+
+        var child2 = SelectedHand.transform.GetChild(2);
+        var origin2 = child2.transform.position;
+        var direction2 = child2.transform.position + child2.transform.forward;
+
+
         //Debug.Log(rot);
         //if (Physics.BoxCast(origin, new Vector3(1.5f, 2, 1), direction, out hit, rot, 1f)) {
         //    Debug.Log(hit.collider.tag);
@@ -235,8 +245,9 @@ public class PlayerMovementScript : MonoBehaviour {
         //    }
         //}
 
-        if (Physics.SphereCast(origin, 0.5f, direction, out hit, 0.5f)) {
-            Debug.Log(hit.collider.tag);
+        if (Physics.SphereCast(origin, 0.5f, direction, out hit, 0.5f)
+            || Physics.SphereCast(origin1, 0.5f, direction1, out hit, 0.5f)
+            || Physics.SphereCast(origin2, 0.5f, direction2, out hit, 0.5f)) {
             String tag = hit.collider.tag;
             if (tag.Equals("Rock")) {
                 Transform sphere = hit.collider.gameObject.transform;

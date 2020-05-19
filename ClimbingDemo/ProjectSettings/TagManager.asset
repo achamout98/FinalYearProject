@@ -9,6 +9,7 @@ TagManager:
   - Obstacle
   - RightHand
   - LeftHand
+  - Platform
   layers:
   - Default
   - TransparentFX
@@ -19,9 +20,9 @@ TagManager:
   - 
   - 
   - PostProcessing
-  - 
-  - 
-  - 
+  - Player
+  - Rocks
+  - Hands
   - 
   - 
   - 

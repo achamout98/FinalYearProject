@@ -11,6 +11,7 @@ public class GameManager : MonoBehaviour
     public GameObject GameUI;
     public GameObject PauseMenu;
     public GameObject OptionsMenu;
+    public GameObject VictoryScreen;
     public static bool is_paused = false;
 
     [Header("Prefabs")]
@@ -26,15 +27,21 @@ public class GameManager : MonoBehaviour
     [SerializeField]
     private GameObject Player;
 
+    public static GameManager instance;
+    public bool mountainConquered = false;
+
+    private bool VictoryTextGone = false;
+
     private void Awake () {
+        instance = this;
         Cam = Camera.main.gameObject;
         Resume();
+        StartCoroutine("SpawnRocks");
     }
 
     // Start is called before the first frame update
     void Start()
     {
-        StartCoroutine("SpawnRocks");
     }
 
     private IEnumerator SpawnRocks () {
@@ -52,6 +59,12 @@ public class GameManager : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
+        if (mountainConquered) {
+            VictoryScreen.SetActive(true);
+            VictoryTextTing();
+            StartCoroutine(EndGame());//AltPause();
+            mountainConquered = false;
+        }
         if (Input.GetKeyDown(KeyCode.Escape)) {
             if (is_paused) {
                 Resume();
@@ -59,6 +72,28 @@ public class GameManager : MonoBehaviour
                 Pause();
             }
         }
+    }
+
+    public void VictoryTextTing () {
+        StartCoroutine(RemoveVictoryScreen());
+    }
+
+    private IEnumerator RemoveVictoryScreen() {
+        Debug.Log("start");
+        var newPos = new Vector3(-1000, VictoryScreen.transform.position.y, VictoryScreen.transform.position.z);
+
+        float time = 7f;
+        float eta = 0f;
+
+        yield return new WaitForSecondsRealtime(3f);
+        while(eta < time) {
+            VictoryScreen.transform.position = Vector3.Lerp(VictoryScreen.transform.position, newPos, (eta/time));
+            eta += Time.deltaTime;
+            yield return null;
+        }
+        VictoryTextGone = true;
+        Debug.Log("done");
+        yield break;
     }
 
     public void Quit () {
@@ -74,6 +109,14 @@ public class GameManager : MonoBehaviour
         Cursor.lockState = CursorLockMode.None;
         Cursor.visible = true;
         Time.timeScale = 0f;
+    }
+
+    IEnumerator EndGame () {
+        yield return new WaitUntil(() => VictoryTextGone);
+        Time.timeScale = 0f;
+        yield return new WaitForSecondsRealtime(10f);
+        SceneManager.LoadScene(SceneManager.GetActiveScene().name);
+        yield break;
     }
 
     public void Resume () {
